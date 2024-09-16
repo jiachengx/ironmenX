@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  odoo:
+    image: odoo:17
+    user: root
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - ./odoo-data:/var/lib/odoo
+      - ./odoo-config:/etc/odoo
+      - ./odoo-addons:/mnt/extra-addons
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo_password
+    restart: unless-stopped
+    command: ["--limit-memory-hard", "0", "--limit-memory-soft", "0"]
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=odoo_password
+      - POSTGRES_USER=odoo
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer-data:/data
+    restart: unless-stopped
